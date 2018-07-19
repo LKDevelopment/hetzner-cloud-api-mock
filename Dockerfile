@@ -6,8 +6,8 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 
 COPY . .
-RUN apk add --no-cache bash git openssh python make gcc g++
+RUN apk add --no-cache bash git openssh python make gcc g++ curl
 RUN npm install --production --quiet --silent
-CMD ["./node_modules/.bin/drakov","-f docs.md","-p 8080","--disableCORS","--stealthmode","--public"]
+CMD ["./api-mock-server.sh"]
 
 EXPOSE 8080
