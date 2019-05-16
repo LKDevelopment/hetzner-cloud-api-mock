@@ -1,0 +1,1396 @@
+FORMAT: 1A
+HOST: https://api.hetzner.cloud/v1
+
+# Hetzner Cloud API
+
+This is the official API documentation for the Public Hetzner Cloud.
+
+# Group Overview
+
+
+# Overview [/]
+
+## Introduction [GET /overview/intro]
+
+The Hetzner Cloud API operates over HTTPS and uses JSON as its data format. The API is a RESTful
+API and utilizes HTTP methods and HTTP status codes to specify requests and responses.
+
+
+As an alternative to working directly with our API you may also consider to use:
+
+* Our CLI program [hcloud](https://github.com/hetznercloud/cli)
+
+* Our [library for Go](https://github.com/hetznercloud/hcloud-go)
+
+Also you can find a [list of libraries, tools, and integrations on GitHub.](https://github.com/hetznercloud/awesome-hcloud)
+
+If you are developing integrations based on our API and your product is Open Source you may be eligible for a free one time €50 (excl. VAT) credit on your account. Please contact us via the the support page on your Cloud Console and let us know the following:
+
+* The type of integration you would like to develop
+* Link to the GitHub repo you will use for the project
+* Link to some other Open Source work you have already done (if you have done so)
+
++ Response 204 (application/dummy)
+## Getting Started [GET /overview/gettingstarted]
+
+>#### Example: Getting Started Request
+```bash
+curl -H "Authorization: Bearer jEheVytlAoFl7F8MqUQ7jAo2hOXASztX" \
+    https://api.hetzner.cloud/v1/servers
+```
+
+>#### Example: Getting Started Response
+```json
+{
+    "servers": [],
+    "meta": {
+        "pagination": {
+            "page": 1,
+            "per_page": 25,
+            "previous_page": null,
+            "next_page": null,
+            "last_page": 1,
+            "total_entries": 0
+        }
+    }
+}
+```
+
+To get started using the API you first need an API token. Sign in into the
+[Hetzner Cloud Console](https://console.hetzner.cloud/) choose a project, go to `Access` → `Tokens`, and create a new token. Make
+sure to copy the token because it won’t be shown to you again.
+A token is bound to a project, to interact with the API of another project you have to create a new token inside the project.
+Let’s say your new token is `jEheVytlAoFl7F8MqUQ7jAo2hOXASztX`.
+
+You’re now ready to do your first request against the API. To get a list
+of all servers in your project, issue the example request on the right side using [curl](https://curl.haxx.se/).
+
+Make sure to replace the token in the example command with the token you have
+just created. Since your project probably does not contain any servers yet,
+the example response will look like the response on the right side.
+We will almost always provide a resource root like `servers` inside the example response.
+A response can also contain a `meta` object with information like [Pagination](#overview-pagination).
+
++ Response 204 (application/dummy)
+## Authentication [GET /overview/auth]
+
+>#### Example: Authorization header
+```bash
+Authorization: Bearer LRK9DAWQ1ZAEFSrCNEEzLCUwhYX1U3g7wMg4dTlkkDC96fyDuyJ39nVbVjCKSDfj
+```
+
+
+All requests to the Hetzner Cloud API must be authenticated via a API token. Include your
+secret API token in every request you send to the API with the `Authorization` HTTP header.
+
+```
+Authorization: Bearer <token>
+```
+
+To create a new API token for your project, switch into the [Hetzner Cloud Console](https://console.hetzner.cloud/) choose a project, go to `Access` → `Tokens`, and create a new token.
+
++ Response 204 (application/dummy)
+## Errors [GET /overview/errors]
+
+>#### Example: Error response
+```json
+{
+  "error": {
+    "code": "invalid_input",
+    "message": "invalid input in field 'broken_field': is too long",
+    "details": {
+      "fields": [
+        {
+          "name": "broken_field",
+          "messages": ["is too long"]
+        }
+      ]
+    }
+  }
+}
+```
+
+Errors are indicated by HTTP status codes. Further, the response of the
+request which generated the error contains an error code, an error message, and,
+optionally, error details. The schema of the error details object depends on
+the error code.
+
+The error response contains the following keys:
+
+| Key       | Meaning                                                               |
+|-----------|-----------------------------------------------------------------------|
+| `code`    | Short string indicating the type of error (machine-parsable)          |
+| `message` | Textual description on what has gone wrong                            |
+| `details` | An object providing for details on the error (schema depends on code) |
+
+### Error Codes
+
+| Code                      | Description                                                                                                    |
+|---------------------------|----------------------------------------------------------------------------------------------------------------|
+| `forbidden`               | Insufficient permissions for this request                                                                      |
+| `invalid_input`           | Error while parsing or processing the input                                                                    |
+| `json_error`              | Invalid JSON input in your request                                                                             |
+| `locked`                  | The item you are trying to access is locked (there is already an action running)                               |
+| `not_found`               | Entity not found                                                                                               |
+| `rate_limit_exceeded`     | Error when sending too many requests                                                                           |
+| `resource_limit_exceeded` | Error when exceeding the maximum quantity of a resource for an account                                         |
+| `resource_unavailable`    | The requested resource is currently unavailable                                                                |
+| `service_error`           | Error within a service                                                                                         |
+| `uniqueness_error`        | One or more of the objects fields must be unique                                                               |
+| `protected`               | The action you are trying to start is protected for this resource                                              |
+| `maintenance`             | Cannot perform operation due to maintenance                                                                    |
+
+### Error Details
+
+**invalid_input**
+
+```json
+{
+  "error": {
+    "code": "invalid_input",
+    "message": "invalid input in field 'broken_field': is too long",
+    "details": {
+      "fields": [
+        {
+          "name": "broken_field",
+          "messages": ["is too long"]
+        }
+      ]
+    }
+  }
+}
+```
+
+**uniqueness_error**
+
+```json
+{
+  "error": {
+    "code": "uniqueness_error",
+    "message": "SSH key with the same fingerprint already exists",
+    "details": {
+      "fields": [
+        {
+          "name": "public_key"
+        }
+      ]
+    }
+  }
+}
+```
+
+**resource_limit_exceeded**
+
+```json
+{
+  "error": {
+    "code": "resource_limit_exceeded",
+    "message": "project limit exceeded",
+    "details": {
+      "limits": [
+        {
+          "name": "project_limit"
+        }
+      ]
+    }
+  }
+}
+```
+
++ Response 204 (application/dummy)
+## Pagination [GET /overview/pagination]
+
+Responses which return multiple items support pagination. If they do support pagination,
+it can be controlled with following query string parameters:
+
+* A `page` parameter specifies the page to fetch. The number of the first page is 1.
+* A `per_page` parameter specifies the number of items returned per page. The default
+  value is 25, the maximum value is 50 except otherwise specified in the documentation.
+
+
+>#### Example: Pagination Link header
+```bash
+Link: <https://api.hetzner.cloud/actions?page=2&per_page=5>; rel="prev",
+      <https://api.hetzner.cloud/actions?page=4&per_page=5>; rel="next",
+      <https://api.hetzner.cloud/actions?page=6&per_page=5>; rel="last"
+```
+
+>Line breaks have been added for display purposes only and responses may only contain
+>some of the above `rel` values.
+
+
+Responses contain a `Link` header with pagination information.
+
+Additionally, if the response body is JSON and the root object is an object, that object
+has a `pagination` object inside the `meta` object with pagination information:
+
+```json
+{
+    "servers": [...],
+    "meta": {
+        "pagination": {
+            "page": 2,
+            "per_page": 25,
+            "previous_page": 1,
+            "next_page": 3,
+            "last_page": 4,
+            "total_entries": 100
+        }
+    }
+}
+```
+
+The keys `previous_page`, `next_page`, `last_page`, and `total_entries` may be `null` when
+on the first page, last page, or when the total number of entries is unknown.
+
++ Response 204 (application/dummy)
+## Sorting [GET /overview/sorting]
+
+>#### Example: Sorting
+```bash
+https://api.hetzner.cloud/actions?sort=status
+https://api.hetzner.cloud/actions?sort=status:asc
+https://api.hetzner.cloud/actions?sort=status:desc
+https://api.hetzner.cloud/actions?sort=status:asc&sort=command:desc
+```
+
+Some responses which return multiple items support sorting. If they do support
+sorting the documentation states which fields can be used for sorting. You
+specify sorting with the `sort` query string parameter. You can sort by
+multiple fields. You can set the sort direction by appending `:asc` or `:desc`
+to the field name. By default, ascending sorting is used.
+
++ Response 204 (application/dummy)
+## Rate Limiting [GET /overview/ratelimit]
+
+All requests, whether they are authenticated or not, are subject to rate
+limiting. If you have reached your limit, your requests will be handled with
+a `429 Too Many Requests` error. Burst requests are allowed. Responses contain
+serveral headers which provide information about your current rate limit status.
+
+*  The `RateLimit-Limit` header contains the total number of requests you
+   can perform per hour.
+
+*  The `RateLimit-Remaining` header contains the number of requests remaining
+   in the current rate limit time frame.
+
+*  The `RateLimit-Reset` header contains a UNIX timestamp of the point in time
+   when your rate limit will have recovered and you will have the full number
+   of requests available again.
+
+The default limit is 3600 requests per hour and per project. The number of remaining
+requests increases gradually. For example, when your limit is 3600 requests per hour,
+the number of remaining requests will increase by 1 every second.
+
++ Response 204 (application/dummy)
+## Labels [GET /overview/labels]
+
+Labels are `key/value` pairs that can be attached to servers, Floating IPs, SSH keys, and images.
+
+Valid label keys have two segments: an optional prefix and name, separated by a slash (`/`).
+The name segment is required and must be 63 characters or less, beginning and ending with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between. The prefix is optional.
+If specified, the prefix must be a DNS subdomain: a series of DNS labels separated by dots (`.`), not longer than 253 characters in total, followed by a slash (`/`).
+
+Valid label values must be 63 characters or less and must be empty or begin and end with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between.
+
+The `hetzner.cloud/` prefix is reserved and cannot be used.
+
+### Examples
+
+* `environment=development`
+* `service=backend`
+* `example.com/my=label`
+* `just-a-key=`
+
+
++ Response 204 (application/dummy)
+## Label Selector [GET /overview/label_selector]
+
+For resources with labels, you can filter resources by their labels using the
+label selector query language.
+
+| Expression           | Meaning                                                             |
+|----------------------|---------------------------------------------------------------------|
+| ``k==v`` / ``k=v``   | Value of key `k` does equal value `v`                               |
+| ``k!=v``             | Value of key `k` does not equal value `v`                           |
+| `k`                  | Key `k` is present                                                  |
+| `!k`                 | Key `k` is not present                                              |
+| `k in (v1,v2,v3)`    | Value of key `k` is `v1`, `v2`, or `v3`                             |
+| `k notin (v1,v2,v3)` | Value of key `k` is neither `v1`, nor `v2`, nor `v3`                |
+| ``k1==v,!k2``        | Value of key `k1` is `v` and key `k2` is not present                |
+
+### Examples
+
+* Returns all resources that have a `env=production` label and that don’t have a `type=database` label:
+
+    `env=production,type=!database`
+
+* Returns all resources that have a `env=testing` or `env=staging` label:
+
+    `env in (testing,staging)`
+
+* Returns all resources that don’t have a `type` label:
+
+    `!type`
+
++ Response 204 (application/dummy)
+## Changelog [GET /overview/changelog]
+
+You can find our changelog on our [Developer Hub](https://developers.hetzner.com/cloud/changelog/?id=backend).
+
++ Response 204 (application/dummy)
+
+# Group Resources
+
+# Actions [/actions]
+
+Actions show the results and progress of asynchronous requests to the API. 
+
+## List all Actions [GET /actions{?status,sort}]
+
+Returns all action objects. You can select specific actions only and sort the results by using URI parameters.
+
++ Parameters
+    + status (enum[string], optional) - Can be used multiple times. Response will have only actions with specified statuses.
+        + Members
+            + `running`
+            + `success`
+            + `error`
+    + sort (enum[string], optional) - Can be used multiple times.
+        + Members
+            + `id`
+            + `id:asc`
+            + `id:desc`
+            + `command`
+            + `command:asc`
+            + `command:desc`
+            + `status`
+            + `status:asc`
+            + `status:desc`
+            + `progress`
+            + `progress:asc`
+            + `progress:desc`
+            + `started`
+            + `started:asc`
+            + `started:desc`
+            + `finished`
+            + `finished:asc`
+            + `finished:desc`
++ Response 200 (application/json)
+    The `actions` key in the reply contains an array of action objects with this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `success`, `running`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/actions
+     ```
+
+
+
+    + Attributes
+        + `actions` (array[Action], required, fixed-type)
+    + Body
+
+## Get one Action [GET /actions/{id}]
+
+Returns a specific action object.
+
++ Parameters
+    + id: `1337` (string) - ID of the action
+
++ Response 200 (application/json)
+    The `action` key in the reply has this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `success`, `running`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/actions/1337
+     ```
+
+
+
+    + Attributes
+        + `action` (Action, required)
+    + Body
+# Servers [/servers]
+
+Servers are virtual machines that can be provisioned.
+
+## Get all Servers [GET /servers{?status,name,label_selector}]
+
+Returns all existing server objects.
+
++ Parameters
+    + status (enum[string], optional) - Can be used multiple times. The response will only contain server matching the status.
+       + Members
+            + `initializing`
+            + `starting`
+            + `running`
+            + `stopping`
+            + `off`
+            + `deleting`
+            + `rebuilding`
+            + `migrating`
+            + `unknown`
+    + name (string, optional) - Can be used to filter servers by their name. The response will only contain the server matching the specified name.
+    + label_selector (string, optional) - Can be used to filter servers by labels. The response will only contain servers matching the label selector.
+
++ Response 200 (application/json)
+    The `servers` key in the reply contains an array of server objects with this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of server |
+    | name | string | Name of the server (must be unique per project and a valid hostname as per RFC 1123) |
+    | status | string | Status of the server <br>Choices: `running`, `initializing`, `starting`, `stopping`, `off`, `deleting`, `migrating`, `rebuilding`, `unknown` |
+    | created | string | Point in time when the server was created (in ISO-8601 format) |
+    | public_net | object | Public network information. The servers ipv4 address can be found in `public_net->ipv4->ip` |
+    | server_type | object | Type of server - determines how much ram, disk and cpu a server has |
+    | datacenter | object | Datacenter this server is located at |
+    | image | object,&nbsp;null | Image this server was created from. |
+    | iso | object,&nbsp;null | ISO image that is attached to this server. Null if no ISO is attached. |
+    | rescue_enabled | boolean | True if rescue mode is enabled: Server will then boot into rescue system on next reboot. |
+    | locked | boolean | True if server has been locked and is not available to user. |
+    | backup_window | string,&nbsp;null | Time window (UTC) in which the backup will run, or null if the backups are not enabled |
+    | outgoing_traffic | number,&nbsp;null | Outbound Traffic for the current billing period in bytes |
+    | ingoing_traffic | number,&nbsp;null | Inbound Traffic for the current billing period in bytes |
+    | included_traffic | number | Free Traffic for the current billing period in bytes |
+    | protection | object | Protection configuration for the server |
+    | labels | object | User-defined labels (key-value pairs) |
+    | volumes | array | IDs of Volumes assigned to this server. |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers
+     ```
+
+
+
+    + Attributes
+        + `servers` (array[Server], required, fixed-type)
+    + Body
+
+## Get a Server [GET /servers/{id}]
+
+Returns a specific server object. The server must exist inside the project.
+
+
++ Parameters
+    + id: `42` (string) - ID of the server
+
++ Response 200 (application/json)
+    The `server` key in the reply contains a server object with this structure:
+
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of server |
+    | name | string | Name of the server (must be unique per project and a valid hostname as per RFC 1123) |
+    | status | string | Status of the server <br>Choices: `running`, `initializing`, `starting`, `stopping`, `off`, `deleting`, `migrating`, `rebuilding`, `unknown` |
+    | created | string | Point in time when the server was created (in ISO-8601 format) |
+    | public_net | object | Public network information. The servers ipv4 address can be found in `public_net->ipv4->ip` |
+    | server_type | object | Type of server - determines how much ram, disk and cpu a server has |
+    | datacenter | object | Datacenter this server is located at |
+    | image | object,&nbsp;null | Image this server was created from. |
+    | iso | object,&nbsp;null | ISO image that is attached to this server. Null if no ISO is attached. |
+    | rescue_enabled | boolean | True if rescue mode is enabled: Server will then boot into rescue system on next reboot. |
+    | locked | boolean | True if server has been locked and is not available to user. |
+    | backup_window | string,&nbsp;null | Time window (UTC) in which the backup will run, or null if the backups are not enabled |
+    | outgoing_traffic | number,&nbsp;null | Outbound Traffic for the current billing period in bytes |
+    | ingoing_traffic | number,&nbsp;null | Inbound Traffic for the current billing period in bytes |
+    | included_traffic | number | Free Traffic for the current billing period in bytes |
+    | protection | object | Protection configuration for the server |
+    | labels | object | User-defined labels (key-value pairs) |
+    | volumes | array | IDs of Volumes assigned to this server. |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42
+     ```
+
+
+
+    + Attributes
+        + `server` (Server, required)
+    + Body
+
+## Create a Server [POST /servers]
+
+Creates a new server. Returns preliminary information about the server as well as an action that covers progress of creation.
+
++ Request (application/json)
+    Please note that server names must be unique per project and valid hostnames as per RFC 1123
+    (i.e. may only contain letters, digits, periods, and dashes).
+    
+    For `server_type` you can either use the ID as listed in [`/server_types`](#server-types-get-all-server-types) or its name.
+    
+    For `image` you can either use the ID as listed in [`/images`](#images-get-all-images) or its name.
+    
+    If you want to create the server in a location, you must set `location` to the ID or name as listed in [`/locations`](#locations-get-all-locations). This is the recommended way. You can be even more specific by setting `datacenter` to the ID or name as listed in [`/datacenters`](#datacenters-get-all-datacenters). However directly specifying the datacenter is discouraged since supply availability in datacenters varies greatly and datacenters may be out of stock for extended periods of time or not serve certain server types at all.
+    
+    For accessing your server we strongly recommend to use SSH keys by passing the respective key ids in `ssh_keys`. If you do not specify any `ssh_keys` we will generate a root password for you and
+    return it in the response.
+    
+    
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | name | string&nbsp;(required) | Name of the server to create (must be unique per project and a valid hostname as per RFC 1123) |
+    | server_type | string&nbsp;(required) | ID or name of the server type this server should be created with |
+    | start_after_create | boolean&nbsp;(optional) | Start Server right after creation. Defaults to true. |
+    | image | string&nbsp;(required) | ID or name of the image the server is created from |
+    | ssh_keys | array&nbsp;(optional) | SSH key IDs or names which should be injected into the server at creation time |
+    | volumes | array&nbsp;(optional) | Volume IDs which should be attached to the server at the creation time. Volumes must be in the same location. |
+    | user_data | string&nbsp;(optional) | Cloud-Init user data to use during server creation. This field is limited to 32KiB. |
+    | labels | object&nbsp;(optional) | User-defined labels (key-value pairs) |
+    | automount | boolean&nbsp;(optional) | Auto mount volumes after attach. |
+    | location | string&nbsp;(optional) | ID or name of location to create server in. |
+    | datacenter | string&nbsp;(optional) | ID or name of datacenter to create server in. |
+
+    > #### Example curl
+     ```bash
+     curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $API_TOKEN" \
+  -d '{"name": "my-server", "server_type": "cx11", "location": "nbg1", "start_after_create": true, "image": "ubuntu-16.04", "ssh_keys": ["my-ssh-key"], "volumes": [1], "user_data": "#cloud-config\nruncmd:\n- [touch, /root/cloud-init-worked]\n", "automount": false}' \
+  https://api.hetzner.cloud/v1/servers
+     ```
+
+
+
+    + Attributes(Server create)
+
++ Response 201 (application/json)
+    The `server` key in the reply contains a server object with this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of server |
+    | name | string | Name of the server (must be unique per project and a valid hostname as per RFC 1123) |
+    | status | string | Status of the server <br>Choices: `initializing`, `starting`, `running`, `stopping`, `off`, `deleting`, `migrating`, `rebuilding` |
+    | created | string | Point in time when the server was created (in ISO-8601 format) |
+    | public_net | object | Public network information. The servers ipv4 address can be found in `public_net->ipv4->ip` |
+    | server_type | object | Type of server - determines how much ram, disk and cpu a server has |
+    | datacenter | object | Datacenter this server is located at |
+    | image | object,&nbsp;null | Image this server was created from. |
+    | iso | object,&nbsp;null | ISO image that is attached to this server. Null if no ISO is attached. |
+    | rescue_enabled | boolean | True if rescue mode is enabled: Server will then boot into rescue system on next reboot. |
+    | locked | boolean | True if server has been locked and is not available to user. |
+    | backup_window | string,&nbsp;null | Time window (UTC) in which the backup will run, or null if the backups are not enabled |
+    | outgoing_traffic | number,&nbsp;null | Outbound Traffic for the current billing period in bytes |
+    | ingoing_traffic | number,&nbsp;null | Inbound Traffic for the current billing period in bytes |
+    | included_traffic | number | Free Traffic for the current billing period in bytes |
+    | protection | object | Protection configuration for the server |
+    | labels | object | User-defined labels (key-value pairs) |
+    | volumes | array | IDs of Volumes assigned to this server. |
+
+
+
+
+    
+    The `action` key in the reply contains an action object with this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `running`, `success`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+
+
+
+
+    Additional actions like a `start_server` action to start the server after it has
+    been created or `attach_volume` actions to attach volumes to the server are returned
+    in the `next_actions` key (each element has the same structure as the `action` key).
+
+    #### Call specific error codes
+    
+    | Code | Description |
+    |------|-------------|
+    | `placement_error` | An error during placement of the server occured |
+    
+    + Attributes
+        + `server` (Server, required)
+            + `status`: `initializing` (enum[string], required) - Status of the server
+                + Members
+                    + `initializing`
+                    + `starting`
+                    + `running`
+                    + `stopping`
+                    + `off`
+                    + `deleting`
+                    + `migrating`
+                    + `rebuilding`
+        + `action` (ActionRunning, required)
+            + `id`: `1` (number, required)
+            + `command`: `create_server` (string)
+        + `next_actions` (array[ActionRunning], required)
+        + `root_password`: `YItygq1v3GYjjMomLaKc` (string, required, nullable) - Root password when no SSH keys have been specified
+
+    + Body
+
+## Update a Server [PUT /servers/{id}]
+
+Updates a server. You can update a server's name and a server's labels.
+
+Please note that server names must be unique per project and valid hostnames as per RFC 1123
+(i.e. may only contain letters, digits, periods, and dashes).
+
+Also note that when updating labels, the server's current set of labels will be replaced
+with the labels provided in the request body. So, for example, if you want to add a new label,
+you have to provide all existing labels plus the new label in the request body.
+
++ Parameters
+    + id: `42` (string) - ID of the server
+
++ Request (application/json)
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | name | string&nbsp;(optional) | New name to set |
+    | labels | object&nbsp;(optional) | New labels |
+
+    > #### Example curl
+     ```bash
+     curl -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer $API_TOKEN" \
+  -d '{"name": "new-name", "labels": {}}' \
+  https://api.hetzner.cloud/v1/servers/42
+     ```
+
+
+
+
+    + Attributes
+        + name: `new-name` (string) - New name to set
+        + labels (object) - New labels
+
++ Response 200 (application/json)
+    The `server` key in the reply contains the modified server object with the new name.
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of server |
+    | name | string | Server name |
+    | status | string | Status of the server <br>Choices: `running`, `initializing`, `starting`, `stopping`, `off`, `deleting`, `migrating`, `rebuilding`, `unknown` |
+    | created | string | Point in time when the server was created (in ISO-8601 format) |
+    | public_net | object | Public network information. The servers ipv4 address can be found in `public_net->ipv4->ip` |
+    | server_type | object | Type of server - determines how much ram, disk and cpu a server has |
+    | datacenter | object | Datacenter this server is located at |
+    | image | object,&nbsp;null | Image this server was created from. |
+    | iso | object,&nbsp;null | ISO image that is attached to this server. Null if no ISO is attached. |
+    | rescue_enabled | boolean | True if rescue mode is enabled: Server will then boot into rescue system on next reboot. |
+    | locked | boolean | True if server has been locked and is not available to user. |
+    | backup_window | string,&nbsp;null | Time window (UTC) in which the backup will run, or null if the backups are not enabled |
+    | outgoing_traffic | number,&nbsp;null | Outbound Traffic for the current billing period in bytes |
+    | ingoing_traffic | number,&nbsp;null | Inbound Traffic for the current billing period in bytes |
+    | included_traffic | number | Free Traffic for the current billing period in bytes |
+    | protection | object | Protection configuration for the server |
+    | labels | object | User-defined labels (key-value pairs) |
+    | volumes | array | IDs of Volumes assigned to this server. |
+
+
+
+
+    + Attributes
+        + `server` (Server, required)
+            + name: `new-name` (string) - Server name
+    + Body
+
+## Delete a Server [DELETE /servers/{id}]
+
+Deletes a server. This immediately removes the server from your account, and it is no longer accessible.
+
++ Parameters
+    + id: `42` (string) - ID of the server
+
++ Response 200 (application/json)
+    The `action` key in the reply contains an action object with this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `running`, `success`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -X DELETE -H "Content-Type: application/json" -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42
+     ```
+
+
+
+    + Attributes
+        + `action` (ActionRunning, required)
+            + `command`: `delete_server` (string)
+
+## Get Metrics for a Server [GET /servers/{id}/metrics{?type,start,end,step}]
+
+Get Metrics for specified server.
+
+You must specify the type of metric to get: `cpu`, `disk` or `network`. You can also specify more than one type by comma separation, e.g. `cpu,disk`.
+
+Depending on the type you will get different time series data:
+
+|Type | Timeseries | Unit | Description |
+|---- |------------|------|-------------|
+|cpu|cpu | percent | Percent CPU usage |
+|disk|disk.0.iops.read | iop/s | Number of read IO operations per second|
+||disk.0.iops.write | iop/s | Number of write IO operations per second|
+||disk.0.bandwidth.read |bytes/s |Bytes read per second|
+||disk.0.bandwidth.write | bytes/s | Bytes written per second |
+|network|network.0.pps.<span>in</span>| packets/s | Public Network interface packets per second received|
+||network.0.pps.out | packets/s | Public Network interface packets per second sent|
+||network.0.bandwidth.<span>in</span> | bytes/s | Public Network interface bytes/s received|
+||network.0.bandwidth.out | bytes/s | Public Network interface bytes/s sent|
+
+
+Metrics are available for the last 30 days only.
+
+If you do not provide the step argument we will automatically adjust it so that a maximum of 100 samples are returned.
+
+We limit the number of samples returned to a maximum of 500 and will adjust the step parameter accordingly.
+
+ + Parameters
+     + id: `42` (string) - ID of the server
+     + type: `cpu` (enum[string], required) - Type of metrics to get
+       + `cpu`
+       + `disk`
+       + `network`
+     + start: `2017-01-01T00:00:00Z` (string, required) - Start of period to get Metrics for (in ISO-8601 format)
+     + end: `2017-01-01T23:00:00Z` (string, required) - End of period to get Metrics for (in ISO-8601 format)
+     + step: `60` (number, optional) - Resolution of results in seconds
+
++ Response 200 (application/json)
+    The `metrics` key in the reply contains a metrics object with this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | start | string | Start of period of metrics reported (in ISO-8601 format) |
+    | end | string | End of period of metrics reported (in ISO-8601 format) |
+    | step | number | Resolution of results in seconds. |
+    | time_series | object | Hash with timeseries information, containing the name of timeseries as key |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42/metrics?type=cpu&start=2017-01-01T00:00:00Z&end=2017-01-01T23:00:00Z
+     ```
+
+
+
+    
+    The `time_series` key in the returned metrics object is a hash with one key per series returned with this structure:
+    
+    ```
+    "time_series": {
+        "name_of_timeseries": {
+            "values": [
+              [
+                1435781470.622,
+                "42"
+              ],
+              [
+                1435781471.622,
+                "43"
+              ]
+            ]
+        }
+    }
+    ```
+    
+    Contrary to the example on the right the timestamp is a number and not a string.
+
+    + Attributes
+        + `metrics` (Metrics Generic, required)
+
+
+
+# Server Actions [/servers/{id}/actions]
+
+## Get all Actions for a Server [GET /servers/{id}/actions{?status,sort}]
+
+Returns all action objects for a server.
+
++ Parameters
+    + id: `42` (string) - ID of the server
+    + status (enum[string], optional) - Can be used multiple times. Response will have only actions with specified statuses.
+        + Members
+            + `running`
+            + `success`
+            + `error`
+    + sort (enum[string], optional) - Can be used multiple times.
+        + Members
+            + `id`
+            + `id:asc`
+            + `id:desc`
+            + `command`
+            + `command:asc`
+            + `command:desc`
+            + `status`
+            + `status:asc`
+            + `status:desc`
+            + `progress`
+            + `progress:asc`
+            + `progress:desc`
+            + `started`
+            + `started:asc`
+            + `started:desc`
+            + `finished`
+            + `finished:asc`
+            + `finished:desc`
+
++ Response 200 (application/json)
+    The `actions` key in the reply contains an array of action objects with this structure:
+
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `success`, `running`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42/actions
+     ```
+
+
+
+    + Attributes
+        + `actions` (array[Action], required, fixed-type)
+    + Body
+
+## Get a specific Action for a Server [GET /servers/{id}/actions/{action_id}]
+
+Returns a specific action object for a Server.
+
++ Parameters
+    + id: `42` (string) - ID of the server
+    + action_id: `1337` (string) - ID of the action
+
++ Response 200 (application/json)
+    The `action` key in the reply has this structure:
+
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `success`, `running`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42/actions/1337
+     ```
+
+
+
+    + Attributes
+        + `action` (Action, required)
+    + Body
+
+## Power on a Server [POST /servers/{id}/actions/poweron]
+
+Starts a server by turning its power on.
+
++ Parameters
+    + id: `42` (string) - ID of the server
+
++ Response 201 (application/json)
+    The `action` key in the reply contains an action object with this structure:
+
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `running`, `success`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42/actions/poweron
+     ```
+
+
+
+    
+    + Attributes
+        + `action` (ActionRunning, required)
+            + `command`: `start_server` (string)
+    + Body
+
+## Soft-reboot a Server [POST /servers/{id}/actions/reboot]
+
+Reboots a server gracefully by sending an ACPI request. The server operating system must
+support ACPI and react to the request, otherwise the server will not reboot.
+
++ Parameters
+    + id: `42` (string) - ID of the server
+
++ Response 201 (application/json)
+    The `action` key in the reply contains an action object with this structure:
+
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `running`, `success`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42/actions/reboot
+     ```
+
+
+
+    
+    + Attributes
+        + `action` (ActionRunning, required)
+            + `command`: `reboot_server` (string)
+    + Body
+
+## Enable Rescue Mode for a Server [POST /servers/{id}/actions/enable_rescue]
+
+Enable the Hetzner Rescue System for this server. The next time a Server with enabled rescue mode boots it will start a special minimal Linux distribution designed for repair and reinstall.
+
+In case a server cannot boot on its own you can use this to access a server’s disks.
+
+Rescue Mode is automatically disabled when you first boot into it or if you do not use it for 60 minutes.
+
+Enabling rescue mode will not [reboot](#server-actions-soft-reboot-a-server) your server — you will have to do this yourself.
+
++ Parameters
+    + id: `42` (string) - ID of the server
+
++ Request (application/json)
+    Specify `type` to select the kind if rescue environment you want to boot.
+
+    To access the booted rescue system by SSH key pass the respective SSH key ids in `ssh_keys`.
+
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | type | string&nbsp;(optional) | Type of rescue system to boot (default: `linux64`) <br>Choices: `linux64`, `linux32`, `freebsd64` |
+    | ssh_keys | array&nbsp;(optional) | Array of SSH key IDs which should be injected into the rescue system. Only available for types: `linux64` and `linux32`. |
+
+    > #### Example curl
+     ```bash
+     curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $API_TOKEN" \
+  -d '{"type": "linux64", "ssh_keys": [2323]}' \
+  https://api.hetzner.cloud/v1/servers/42/actions/enable_rescue
+     ```
+
+
+
+    + Attributes
+        + `type`: `linux64` (enum[string], optional) - Type of rescue system to boot (default: `linux64`)
+            + Members
+                + `linux64`
+                + `linux32`
+                + `freebsd64`
+        + `ssh_keys`: `2323` (array[number], optional, fixed-type) - Array of SSH key IDs which should be injected into the rescue system. Only available for types: `linux64` and `linux32`.
+
++ Response 201 (application/json)
+    The `root_password` key in the reply contains the root password that can be used to access the booted rescue system.
+
+    The `action` key in the reply contains an action object with this structure:
+
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `success`, `running`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+
+
+
+
+
+    #### Call specific error codes
+
+    | Code | Description |
+    |------|-------------|
+    | `rescue_already_enabled` | Returned when the rescue system is already enabled |
+    + Attributes
+        + `root_password`: `zCWbFhnu950dUTko5f40` (string) - Root Password for Server once it gets booted in rescue mode
+        + `action` (Action, required)
+            + `command`: `enable_rescue` (string)
+    + Body
+
+# Data Structures
+
+## SSHKey
++ `id`: `2323` (number, required) - ID of the SSH key
++ `name`: `My ssh key` (string, required) - Name of the SSH key (must be unique per project)
++ `fingerprint`: `b7:2f:30:a0:2f:6c:58:6c:21:04:58:61:ba:06:3b:2f` (string, required) - Fingerprint of public key
++ `public_key`: `ssh-rsa AAAjjk76kgf...Xt` (string, required) - Public key
++ `labels` (object, required) - User-defined labels (key-value pairs)
+
+## Server create (object)
++ `name`: `my-server` (string, required) - Name of the server to create (must be unique per project and a valid hostname as per RFC 1123)
++ `server_type`: `cx11` (string, required) - ID or name of the server type this server should be created with
++ One Of
+    + `location`: `nbg1` (string, optional) - ID or name of location to create server in.
+    + `datacenter`: `nbg1-dc3` (string, optional) - ID or name of datacenter to create server in.
++ `start_after_create`: `true` (boolean, optional) - Start Server right after creation. Defaults to true.
++ `image`: `ubuntu-16.04` (string, required) - ID or name of the image the server is created from
++ `ssh_keys`: `my-ssh-key` (array, optional, fixed-type) - SSH key IDs or names which should be injected into the server at creation time
++ `volumes`: `1` (array[number], optional) - Volume IDs which should be attached to the server at the creation time. Volumes must be in the same location.
++ `user_data`: `#cloud-config\nruncmd:\n- [touch, /root/cloud-init-worked]\n` (string, optional) - Cloud-Init user data to use during server creation. This field is limited to 32KiB.
++ `labels` (object, optional) - User-defined labels (key-value pairs)
++ `automount`: `false` (boolean, optional) - Auto mount volumes after attach.
+
+
+## Server (object)
++ `id`: `42` (number, required) - ID of server
++ `name`: `my-server` (string, required) - Name of the server (must be unique per project and a valid hostname as per RFC 1123)
++ `status`: `running` (enum[string], required) - Status of the server
+    + Members
+        + `running`
+        + `initializing`
+        + `starting`
+        + `stopping`
+        + `off`
+        + `deleting`
+        + `migrating`
+        + `rebuilding`
+        + `unknown`
++ `created`: `2016-01-30T23:50+00:00` (string, required) - Point in time when the server was created (in ISO-8601 format)
++ `public_net` (Public Network, required) - Public network information. The servers ipv4 address can be found in `public_net->ipv4->ip`
++ `server_type` (ServerType, required) - Type of server - determines how much ram, disk and cpu a server has
++ `datacenter` (Datacenter, required) - Datacenter this server is located at
++ `image` (Image, required, nullable) - Image this server was created from.
++ `iso` (ISO, required, nullable) - ISO image that is attached to this server. Null if no ISO is attached.
++ `rescue_enabled`: `false` (boolean, required) - True if rescue mode is enabled: Server will then boot into rescue system on next reboot.
++ `locked`: `false` (boolean, required) - True if server has been locked and is not available to user.
++ `backup_window`: `22-02` (string, required, nullable) - Time window (UTC) in which the backup will run, or null if the backups are not enabled
++ `outgoing_traffic`: `123456` (number, required, nullable) - Outbound Traffic for the current billing period in bytes
++ `ingoing_traffic`: `123456` (number, required, nullable) - Inbound Traffic for the current billing period in bytes
++ `included_traffic`: `654321` (number, required) - Free Traffic for the current billing period in bytes
++ `protection` (ServerProtection, required) - Protection configuration for the server
++ `labels` (object, required) - User-defined labels (key-value pairs)
++ `volumes` (array[number], optional) - IDs of Volumes assigned to this server.
+
+
+## ServerType
++ `id`: `1` (number, required) - ID of the server type
++ `name`: `cx11` (string, required) - Unique identifier of the server type
++ `description`: `CX11` (string, required) - Description of the server type
++ `cores`: `1` (number, required) - Number of cpu cores a server of this type will have
++ `memory`: `1` (number, required) - Memory a server of this type will have in GB
++ `disk`: `25` (number, required) - Disk size a server of this type will have in GB
++ `deprecated`: `true` (boolean, required) - True if server type is deprecated
++ `prices` (array[ServerTypeLocationPrice], required, fixed-type) - Prices in different Locations
++ `storage_type`: `local` (enum[string], required) - Type of server boot drive. Local has higher speed. Network has better availability.
+    + Members
+        + `local`
+        + `network`
++ `cpu_type`: `shared` (enum[string], required) - Type of cpu.
+    + Members
+        + `shared`
+        + `dedicated`
+
+## Location
++ `id`: `1` (number, required) - ID of the location
++ `name`: `fsn1` (string, required) - Unique identifier of the location
++ `description`: `Falkenstein DC Park 1` (string, required) - Description of the location
++ `country`: `DE` (string, required) - ISO 3166-1 alpha-2 code of the country the location resides in
++ `city`: `Falkenstein` (string, required) - City the location is closest to
++ `latitude`: `50.476120` (number, required) - Latitude of the city closest to the location
++ `longitude`: `12.370071` (number, required) - Longitude of the city closest to the location
+
+## Datacenter
++ `id`: `1` (number, required) - ID of the datacenter
++ `name`: `fsn1-dc8` (string, required) - Unique identifier of the datacenter
++ `description`: `Falkenstein 1 DC 8` (string, required) - Description of the datacenter
++ `location` (Location, required) - Location where the datacenter resides in
++ `server_types` (DatacenterServerTypes, required) - The server types the datacenter can handle
+
+## DatacenterServerTypes
++ `supported`: 1,2,3 (array[number], required, fixed-type) - IDs of server types that are supported in the datacenter
++ `available`: 1,2,3 (array[number], required, fixed-type) - IDs of server types that are supported and for which the datacenter has enough resources left
++ `available_for_migration`: 1,2,3 (array[number], required, fixed-type) - IDs of server types that are supported and for which the datacenter has enough resources left
+
+
+## Image
++ `id`: `4711` (number, required) - ID of the image
++ `type`: `snapshot` (enum[string], required) - Type of the image
+    + Members
+        + `system`
+        + `snapshot`
+        + `backup`
+
++ `status`: `available` (enum[string], required) - Whether the image can be used or if it's still being created
+    + Members
+        + `available`
+        + `creating`
++ `name`: `ubuntu-16.04` (string, nullable, required) - Unique identifier of the image. This value is only set for system images.
++ `description`: `Ubuntu 16.04 Standard 64 bit` (string, required) - Description of the image
++ `image_size`: `2.3` (number, required, nullable) - Size of the image file in our storage in GB. For snapshot images this is the value relevant for calculating costs for the image.
++ `disk_size`: `10` (number, required) - Size of the disk contained in the image in GB.
++ `created`: `2016-01-30T23:50+00:00` (string, required) - Point in time when the image was created (in ISO-8601 format)
++ `created_from` (ImageCreator, required, nullable) - Information about the server the image was created from
++ `bound_to` (number, required, nullable) - ID of server the image is bound to. Only set for images of type `backup`.
++ `os_flavor`: `ubuntu` (enum[string], required) - Flavor of operating system contained in the image
+    + Members
+        + `ubuntu`
+        + `centos`
+        + `debian`
+        + `fedora`
+        + `unknown`
++ `os_version`: `16.04` (string, required, nullable) - Operating system version
++ `rapid_deploy`: `false` (boolean) - Indicates that rapid deploy of the image is available
++ `protection` (ImageProtection, required) - Protection configuration for the image
++ `deprecated`: `2018-02-28T00:00:00+00:00` (string, required, nullable) - Point in time when the image is considered to be deprecated (in ISO-8601 format)
++ `labels` (object, required) - User-defined labels (key-value pairs)
+
+## Snapshot Image (Image)
++ `name` (string, nullable, required) - Unique identifier of the image. This value is only set for system images.
++ `type`: `snapshot` (enum[string], required) - Type of the image
+    + Members
+        + `snapshot`
+        + `system`
+        + `backup`
+
+## ImageCreator (object)
++ `id`: `1` (number, required) - ID of the server the image was created from
++ `name`: `Server` (string, required) - Server name at the time the image was created
+
+## Action
++ `id`: `13` (number, required) - ID of the action
++ `command`: `start_server` (string, required) - Command executed in the action
++ `status`: `success` (enum[string], required) - Status of the action
+    + Members
+        + `success`
+        + `running`
+        + `error`
++ `progress`: `100` (number, required) - Progress of action in percent
++ `started`: `2016-01-30T23:55:00+00:00` (string, required) - Point in time when the action was started (in ISO-8601 format)
++ `finished`: `2016-01-30T23:56:00+00:00` (string, required, nullable) - Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null.
++ `resources` (array[ResourceRef], required, fixed-type) - Resources the action relates to
++ `error` (ActionErrorRef, required, nullable) - Error message for the action if error occured, otherwise null.
+
+## ActionRunning (Action)
++ `status`: `running` (enum[string], required) - Status of the action
+    + Members
+        + `running`
+        + `success`
+        + `error`
++ `progress`: `0` (number, required) - Progress of action in percent
++ `started`: `2016-01-30T23:50+00:00` (string, required) - Point in time when the action was started (in ISO-8601 format)
++ `finished` (string, required, nullable) - Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null.
++ `resources` (array[ResourceRef], required, fixed-type) - Resources the action relates to
++ `error` (ActionErrorRef, required, nullable) - Error message for the action if error occured, otherwise null.
+
+## ActionErrorRef
++ `code`: `action_failed` (string, required) - Fixed machine readable code
++ `message`: `Action failed` (string, required) - Humanized error message.
+
+
+## ResourceRef
++ `id`: `42` (number, required) - ID of resource referenced
++ `type`: `server` (string, required) - Type of resource referenced
+
+## ResourceRefImage
++ `id`: `4711` (number, required) - ID of resource referenced
++ `type`: `image` (string, required) - Type of resource referenced
+
+## ResourceRefFloatingIP
++ `id`: `4711` (number, required) - ID of resource referenced
++ `type`: `floating_ip` (string, required) - Type of resource referenced
+
+## ResourceRefVolume
++ `id`: `13` (number, required) - ID of resource referenced
++ `type`: `volume` (string, required) - Type of resource referenced
+
+## ErrorRef
++ `code`: `server_create_failed` (string, required) - Fixed machine readable code
++ `message`: `Creating the server failed` (string, required) - Humanized error message.
+
+## FloatingIP
++ `id`: `4711` (number, required) - ID of the Floating IP
++ `description`: `Web Frontend` (string, nullable, required) - Description of the Floating IP
++ `ip`: `131.232.99.1` (string, required) - IP address of the Floating IP
++ `type`: `ipv4` (enum[string], required) - Type of the Floating IP
+    + Members
+        + `ipv4`
+        + `ipv6`
++ `server`: `42` (number, nullable, required) -Id of the Server the Floating IP is assigned to, null if it is not assigned at all.
++ `dns_ptr` (array[FloatingIPrDNS], required, fixed-type) - Array of reverse DNS entries
++ `home_location` (Location, required) - Location the Floating IP was created in. Routing is optimized for this location.
++ `blocked`: `false` (boolean, required) - Whether the IP is blocked
++ `protection` (FloatingIPProtection, required) - Protection configuration for the Floating IP
++ `labels` (object, required) - User-defined labels (key-value pairs)
+
+## FloatingIPrDNS (object)
++ `ip`: `2001:db8::1` (string, required) - Single IPv4 or IPv6 address
++ `dns_ptr`: `server.example.com` (string, required) - DNS pointer for the specific IP address
+
+## ISO (object)
++ `id`: 4711 (number, required) - ID of the ISO
++ `name`: `FreeBSD-11.0-RELEASE-amd64-dvd1` (string, required, nullable) - Unique identifier of the ISO. Only set for public ISOs
++ `description`: `FreeBSD 11.0 x64` (string, required) - Description of the ISO
++ `type`: `public` (enum[string], required) - Type of the ISO
+    + Members
+        + `public`
+        + `private`
++ `deprecated`: `2018-02-28T00:00:00+00:00` (string, required, nullable) - ISO 8601 timestamp of deprecation, null if ISO is still available. After the deprecation time it will no longer be possible to attach the ISO to servers.
+
+
+## Metrics Generic (object)
+  + `start`: `2017-01-01T00:00:00+00:00` (string, required) - Start of period of metrics reported (in ISO-8601 format)
+  + `end`: `2017-01-01T23:00:00+00:00` (string, required) - End of period of metrics reported (in ISO-8601 format)
+  + `step`: `60` (number, required) - Resolution of results in seconds.
+  + `time_series` (object, required) - Hash with timeseries information, containing the name of timeseries as key
+    + *name_of_timeseries (string, required)* (Metrics Values, required)
+
+## Metrics Values (object)
++ `values` (array, required, fixed-type) - Metrics Timestamps with values
+  + 1435781470.622, 42 (array)
+
+
+## IPv4 (object)
++ `ip`: `1.2.3.4` (string, required) - IP address (v4) of this server.
++ `blocked`: `false` (boolean, required) - If the IP is blocked by our anti abuse dept
++ `dns_ptr`: `server01.example.com` (string, required) - Reverse DNS PTR entry for the IPv4 addresses of this server.
+
+## IPv6 (object)
++ `ip`: `2001:db8::/64` (string, required) - IP address (v4) of this server.
++ `blocked`: `false` (boolean, required) - If the IP is blocked by our anti abuse dept
++ `dns_ptr` (array[IPv6rDNS], required, fixed-type, nullable) - Reverse DNS PTR entries for the IPv6 addresses of this server, `null` by default.
+
+## IPv6rDNS (object)
++ `ip`: `2001:db8::1` (string, required) - Single IPv6 address of this server for which the reverse DNS entry has been set up.
++ `dns_ptr`: `server.example.com` (string, required) - DNS pointer for the specific IP address.
+
+# Public Network (object)
++ `ipv4` (IPv4, required) - IP address (v4) and its reverse dns entry of this server.
++ `ipv6` (IPv6, required) - IPv6 network assigned to this server and its reverse dns entry.
++ `floating_ips`: `478` (array[number], required, fixed-type) - IDs of floating IPs assigned to this server.
+
+
+## NetGrossPrice (object)
++ `net`: `1.0000000000` (string, required) - Price without VAT
++ `gross`: `1.1900000000000000` (string, required) - Price with VAT added
+
+## ImagePrice (object)
++ `price_per_gb_month` (NetGrossPrice, required)
+
+## FloatingIPPrice (object)
++ `price_monthly` (NetGrossPrice, required)
+
+## TrafficPrice (object)
++ `price_per_tb` (NetGrossPrice, required)
+
+## BackupPrice (object)
++ `percentage`: `20.0000000000` (string, required) - Percentage by how much the base price will increase
+
+## ServerTypeLocationPrice (object)
++ `location`: `fsn1` (string, required) - Name of the location the price is for
++ `price_hourly` (NetGrossPrice, required) - Hourly costs for a server type in this location
++ `price_monthly` (NetGrossPrice, required) - Monthly costs for a server type in this location
+
+## ServerTypesPricing (object)
++ `id`: 4 (number, required) - ID of the server type the price is for
++ `name`: `CX11` (string, required) - Name of the server type the price is for
++ `prices` (array[ServerTypeLocationPrice], required, fixed-type) - Server type costs per location
+
+## VolumePrice (object)
++ `price_per_gb_month` (NetGrossPrice, required)
+
+## Price (object)
++ `currency`: `EUR` (string, required) - Currency the returned prices are expressed in, coded according to ISO 4217.
++ `vat_rate`: `19.000000` (string, required) - The VAT rate used for calculating prices with VAT.
++ `image` (ImagePrice, required) - The cost of Image per GB/month.
++ `floating_ip` (FloatingIPPrice, required) - The cost of one floating IP per month.
++ `traffic` (TrafficPrice, required) - The cost of additional traffic per TB.
++ `server_backup` (BackupPrice, required) - Will increase base server costs by specific percentage.
++ `volume` (VolumePrice, required, required) - The cost of Volume per GB/month.
++ `server_types` (array[ServerTypesPricing], required, fixed-type) - Costs of server types per location and type.
+
+## ServerProtection
++ `delete`: `false` (boolean, required) - If true, prevents the server from being deleted
++ `rebuild`: `false` (boolean, required) - If true, prevents the server from being rebuilt
+
+## FloatingIPProtection
++ `delete`: `false` (boolean, required) - If true, prevents the Floating IP from being deleted
+
+## ImageProtection
++ `delete`: `false` (boolean, required) - If true, prevents the snapshot from being deleted
+
+## VolumeProtection
++ `delete`: `false` (boolean, required) - If true, prevents the Volume from being deleted
+
+## Volume (object)
++ `id`: `4711` (number, required) - ID of the Volume
++ `created`: `2016-01-30T23:50:11+00:00` (string, required) - Point in time when the Volume was created (in ISO-8601 format)
++ `name`: `database-storage` (string, required) - Name of the Volume
++ `server`: `12` (number, nullable, required) - ID of the Server the Volume is attached to, null if it is not attached at all.
++ `location` (Location, required) - Location of the Volume. Volume can only be attached to Servers in the same location.
++ `size`: `42` (number, required) - Size in GB of the Volume
++ `linux_device`: `/dev/disk/by-id/scsi-0HC_Volume_4711` (string, required) - Device path on the file system for the Volume
++ `protection` (VolumeProtection, required) - Protection configuration for the Volume
++ `labels` (object, required) - User-defined labels (key-value pairs)
++ `status`: `available` (enum[string], required) - Current status of the volume
+    + Members
+        + `creating`
+        + `available`
++ `format`: `xfs` (string, nullable, required) - Filesystem of the volume if formatted on creation, null if not formatted on creation.
+

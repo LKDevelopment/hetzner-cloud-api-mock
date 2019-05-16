@@ -1,0 +1,29 @@
+{
+  "element": "parseResult",
+  "content": [
+    {
+      "element": "annotation",
+      "meta": {
+        "classes": [
+          "error"
+        ]
+      },
+      "attributes": {
+        "code": 4,
+        "sourceMap": [
+          {
+            "element": "sourceMap",
+            "content": [
+              [
+                42726,
+                35
+              ]
+            ]
+          }
+        ]
+      },
+      "content": "base type 'ActionRunning' is not defined in the document"
+    }
+  ]
+}
+

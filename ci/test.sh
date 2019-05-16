@@ -1,0 +1,3 @@
+#!/bin/bash -e
+
+cd api_mock/ && go test ./...

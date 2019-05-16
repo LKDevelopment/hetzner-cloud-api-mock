@@ -1,0 +1,1003 @@
+FORMAT: 1A
+HOST: https://api.hetzner.cloud/v1
+
+# Hetzner Cloud API
+
+This is the official API documentation for the Public Hetzner Cloud.
+
+# Group Overview
+
+
+# Overview [/]
+
+## Introduction [GET /overview/intro]
+
+The Hetzner Cloud API operates over HTTPS and uses JSON as its data format. The API is a RESTful
+API and utilizes HTTP methods and HTTP status codes to specify requests and responses.
+
+
+As an alternative to working directly with our API you may also consider to use:
+
+* Our CLI program [hcloud](https://github.com/hetznercloud/cli)
+
+* Our [library for Go](https://github.com/hetznercloud/hcloud-go)
+
+Also you can find a [list of libraries, tools, and integrations on GitHub.](https://github.com/hetznercloud/awesome-hcloud)
+
+If you are developing integrations based on our API and your product is Open Source you may be eligible for a free one time €50 (excl. VAT) credit on your account. Please contact us via the the support page on your Cloud Console and let us know the following:
+
+* The type of integration you would like to develop
+* Link to the GitHub repo you will use for the project
+* Link to some other Open Source work you have already done (if you have done so)
+
++ Response 204 (application/dummy)
+## Getting Started [GET /overview/gettingstarted]
+
+>#### Example: Getting Started Request
+```bash
+curl -H "Authorization: Bearer jEheVytlAoFl7F8MqUQ7jAo2hOXASztX" \
+    https://api.hetzner.cloud/v1/servers
+```
+
+>#### Example: Getting Started Response
+```json
+{
+    "servers": [],
+    "meta": {
+        "pagination": {
+            "page": 1,
+            "per_page": 25,
+            "previous_page": null,
+            "next_page": null,
+            "last_page": 1,
+            "total_entries": 0
+        }
+    }
+}
+```
+
+To get started using the API you first need an API token. Sign in into the
+[Hetzner Cloud Console](https://console.hetzner.cloud/) choose a project, go to `Access` → `Tokens`, and create a new token. Make
+sure to copy the token because it won’t be shown to you again.
+A token is bound to a project, to interact with the API of another project you have to create a new token inside the project.
+Let’s say your new token is `jEheVytlAoFl7F8MqUQ7jAo2hOXASztX`.
+
+You’re now ready to do your first request against the API. To get a list
+of all servers in your project, issue the example request on the right side using [curl](https://curl.haxx.se/).
+
+Make sure to replace the token in the example command with the token you have
+just created. Since your project probably does not contain any servers yet,
+the example response will look like the response on the right side.
+We will almost always provide a resource root like `servers` inside the example response.
+A response can also contain a `meta` object with information like [Pagination](#overview-pagination).
+
++ Response 204 (application/dummy)
+## Authentication [GET /overview/auth]
+
+>#### Example: Authorization header
+```bash
+Authorization: Bearer LRK9DAWQ1ZAEFSrCNEEzLCUwhYX1U3g7wMg4dTlkkDC96fyDuyJ39nVbVjCKSDfj
+```
+
+
+All requests to the Hetzner Cloud API must be authenticated via a API token. Include your
+secret API token in every request you send to the API with the `Authorization` HTTP header.
+
+```
+Authorization: Bearer <token>
+```
+
+To create a new API token for your project, switch into the [Hetzner Cloud Console](https://console.hetzner.cloud/) choose a project, go to `Access` → `Tokens`, and create a new token.
+
++ Response 204 (application/dummy)
+## Errors [GET /overview/errors]
+
+>#### Example: Error response
+```json
+{
+  "error": {
+    "code": "invalid_input",
+    "message": "invalid input in field 'broken_field': is too long",
+    "details": {
+      "fields": [
+        {
+          "name": "broken_field",
+          "messages": ["is too long"]
+        }
+      ]
+    }
+  }
+}
+```
+
+Errors are indicated by HTTP status codes. Further, the response of the
+request which generated the error contains an error code, an error message, and,
+optionally, error details. The schema of the error details object depends on
+the error code.
+
+The error response contains the following keys:
+
+| Key       | Meaning                                                               |
+|-----------|-----------------------------------------------------------------------|
+| `code`    | Short string indicating the type of error (machine-parsable)          |
+| `message` | Textual description on what has gone wrong                            |
+| `details` | An object providing for details on the error (schema depends on code) |
+
+### Error Codes
+
+| Code                      | Description                                                                                                    |
+|---------------------------|----------------------------------------------------------------------------------------------------------------|
+| `forbidden`               | Insufficient permissions for this request                                                                      |
+| `invalid_input`           | Error while parsing or processing the input                                                                    |
+| `json_error`              | Invalid JSON input in your request                                                                             |
+| `locked`                  | The item you are trying to access is locked (there is already an action running)                               |
+| `not_found`               | Entity not found                                                                                               |
+| `rate_limit_exceeded`     | Error when sending too many requests                                                                           |
+| `resource_limit_exceeded` | Error when exceeding the maximum quantity of a resource for an account                                         |
+| `resource_unavailable`    | The requested resource is currently unavailable                                                                |
+| `service_error`           | Error within a service                                                                                         |
+| `uniqueness_error`        | One or more of the objects fields must be unique                                                               |
+| `protected`               | The action you are trying to start is protected for this resource                                              |
+| `maintenance`             | Cannot perform operation due to maintenance                                                                    |
+
+### Error Details
+
+**invalid_input**
+
+```json
+{
+  "error": {
+    "code": "invalid_input",
+    "message": "invalid input in field 'broken_field': is too long",
+    "details": {
+      "fields": [
+        {
+          "name": "broken_field",
+          "messages": ["is too long"]
+        }
+      ]
+    }
+  }
+}
+```
+
+**uniqueness_error**
+
+```json
+{
+  "error": {
+    "code": "uniqueness_error",
+    "message": "SSH key with the same fingerprint already exists",
+    "details": {
+      "fields": [
+        {
+          "name": "public_key"
+        }
+      ]
+    }
+  }
+}
+```
+
+**resource_limit_exceeded**
+
+```json
+{
+  "error": {
+    "code": "resource_limit_exceeded",
+    "message": "project limit exceeded",
+    "details": {
+      "limits": [
+        {
+          "name": "project_limit"
+        }
+      ]
+    }
+  }
+}
+```
+
++ Response 204 (application/dummy)
+## Pagination [GET /overview/pagination]
+
+Responses which return multiple items support pagination. If they do support pagination,
+it can be controlled with following query string parameters:
+
+* A `page` parameter specifies the page to fetch. The number of the first page is 1.
+* A `per_page` parameter specifies the number of items returned per page. The default
+  value is 25, the maximum value is 50 except otherwise specified in the documentation.
+
+
+>#### Example: Pagination Link header
+```bash
+Link: <https://api.hetzner.cloud/actions?page=2&per_page=5>; rel="prev",
+      <https://api.hetzner.cloud/actions?page=4&per_page=5>; rel="next",
+      <https://api.hetzner.cloud/actions?page=6&per_page=5>; rel="last"
+```
+
+>Line breaks have been added for display purposes only and responses may only contain
+>some of the above `rel` values.
+
+
+Responses contain a `Link` header with pagination information.
+
+Additionally, if the response body is JSON and the root object is an object, that object
+has a `pagination` object inside the `meta` object with pagination information:
+
+```json
+{
+    "servers": [...],
+    "meta": {
+        "pagination": {
+            "page": 2,
+            "per_page": 25,
+            "previous_page": 1,
+            "next_page": 3,
+            "last_page": 4,
+            "total_entries": 100
+        }
+    }
+}
+```
+
+The keys `previous_page`, `next_page`, `last_page`, and `total_entries` may be `null` when
+on the first page, last page, or when the total number of entries is unknown.
+
++ Response 204 (application/dummy)
+## Sorting [GET /overview/sorting]
+
+>#### Example: Sorting
+```bash
+https://api.hetzner.cloud/actions?sort=status
+https://api.hetzner.cloud/actions?sort=status:asc
+https://api.hetzner.cloud/actions?sort=status:desc
+https://api.hetzner.cloud/actions?sort=status:asc&sort=command:desc
+```
+
+Some responses which return multiple items support sorting. If they do support
+sorting the documentation states which fields can be used for sorting. You
+specify sorting with the `sort` query string parameter. You can sort by
+multiple fields. You can set the sort direction by appending `:asc` or `:desc`
+to the field name. By default, ascending sorting is used.
+
++ Response 204 (application/dummy)
+## Rate Limiting [GET /overview/ratelimit]
+
+All requests, whether they are authenticated or not, are subject to rate
+limiting. If you have reached your limit, your requests will be handled with
+a `429 Too Many Requests` error. Burst requests are allowed. Responses contain
+serveral headers which provide information about your current rate limit status.
+
+*  The `RateLimit-Limit` header contains the total number of requests you
+   can perform per hour.
+
+*  The `RateLimit-Remaining` header contains the number of requests remaining
+   in the current rate limit time frame.
+
+*  The `RateLimit-Reset` header contains a UNIX timestamp of the point in time
+   when your rate limit will have recovered and you will have the full number
+   of requests available again.
+
+The default limit is 3600 requests per hour and per project. The number of remaining
+requests increases gradually. For example, when your limit is 3600 requests per hour,
+the number of remaining requests will increase by 1 every second.
+
++ Response 204 (application/dummy)
+## Labels [GET /overview/labels]
+
+Labels are `key/value` pairs that can be attached to servers, Floating IPs, SSH keys, and images.
+
+Valid label keys have two segments: an optional prefix and name, separated by a slash (`/`).
+The name segment is required and must be 63 characters or less, beginning and ending with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between. The prefix is optional.
+If specified, the prefix must be a DNS subdomain: a series of DNS labels separated by dots (`.`), not longer than 253 characters in total, followed by a slash (`/`).
+
+Valid label values must be 63 characters or less and must be empty or begin and end with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between.
+
+The `hetzner.cloud/` prefix is reserved and cannot be used.
+
+### Examples
+
+* `environment=development`
+* `service=backend`
+* `example.com/my=label`
+* `just-a-key=`
+
+
++ Response 204 (application/dummy)
+## Label Selector [GET /overview/label_selector]
+
+For resources with labels, you can filter resources by their labels using the
+label selector query language.
+
+| Expression           | Meaning                                                             |
+|----------------------|---------------------------------------------------------------------|
+| ``k==v`` / ``k=v``   | Value of key `k` does equal value `v`                               |
+| ``k!=v``             | Value of key `k` does not equal value `v`                           |
+| `k`                  | Key `k` is present                                                  |
+| `!k`                 | Key `k` is not present                                              |
+| `k in (v1,v2,v3)`    | Value of key `k` is `v1`, `v2`, or `v3`                             |
+| `k notin (v1,v2,v3)` | Value of key `k` is neither `v1`, nor `v2`, nor `v3`                |
+| ``k1==v,!k2``        | Value of key `k1` is `v` and key `k2` is not present                |
+
+### Examples
+
+* Returns all resources that have a `env=production` label and that don’t have a `type=database` label:
+
+    `env=production,type=!database`
+
+* Returns all resources that have a `env=testing` or `env=staging` label:
+
+    `env in (testing,staging)`
+
+* Returns all resources that don’t have a `type` label:
+
+    `!type`
+
++ Response 204 (application/dummy)
+## Changelog [GET /overview/changelog]
+
+You can find our changelog on our [Developer Hub](https://developers.hetzner.com/cloud/changelog/?id=backend).
+
++ Response 204 (application/dummy)
+
+# Group Resources
+
+# Actions [/actions]
+
+Actions show the results and progress of asynchronous requests to the API. 
+
+## List all Actions [GET /actions{?status,sort}]
+
+Returns all action objects. You can select specific actions only and sort the results by using URI parameters.
+
++ Parameters
+    + status (enum[string], optional) - Can be used multiple times. Response will have only actions with specified statuses.
+        + Members
+            + `running`
+            + `success`
+            + `error`
+    + sort (enum[string], optional) - Can be used multiple times.
+        + Members
+            + `id`
+            + `id:asc`
+            + `id:desc`
+            + `command`
+            + `command:asc`
+            + `command:desc`
+            + `status`
+            + `status:asc`
+            + `status:desc`
+            + `progress`
+            + `progress:asc`
+            + `progress:desc`
+            + `started`
+            + `started:asc`
+            + `started:desc`
+            + `finished`
+            + `finished:asc`
+            + `finished:desc`
++ Response 200 (application/json)
+    The `actions` key in the reply contains an array of action objects with this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `success`, `running`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/actions
+     ```
+
+
+
+    + Attributes
+        + `actions` (array[Action], required, fixed-type)
+    + Body
+
+## Get one Action [GET /actions/{id}]
+
+Returns a specific action object.
+
++ Parameters
+    + id: `1337` (string) - ID of the action
+
++ Response 200 (application/json)
+    The `action` key in the reply has this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `success`, `running`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/actions/1337
+     ```
+
+
+
+    + Attributes
+        + `action` (Action, required)
+    + Body
+# Servers [/servers]
+
+Servers are virtual machines that can be provisioned.
+
+## Get all Servers [GET /servers{?status,name,label_selector}]
+
+Returns all existing server objects.
+
++ Parameters
+    + status (enum[string], optional) - Can be used multiple times. The response will only contain server matching the status.
+       + Members
+            + `initializing`
+            + `starting`
+            + `running`
+            + `stopping`
+            + `off`
+            + `deleting`
+            + `rebuilding`
+            + `migrating`
+            + `unknown`
+    + name (string, optional) - Can be used to filter servers by their name. The response will only contain the server matching the specified name.
+    + label_selector (string, optional) - Can be used to filter servers by labels. The response will only contain servers matching the label selector.
+
++ Response 200 (application/json)
+    The `servers` key in the reply contains an array of server objects with this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of server |
+    | name | string | Name of the server (must be unique per project and a valid hostname as per RFC 1123) |
+    | status | string | Status of the server <br>Choices: `running`, `initializing`, `starting`, `stopping`, `off`, `deleting`, `migrating`, `rebuilding`, `unknown` |
+    | created | string | Point in time when the server was created (in ISO-8601 format) |
+    | public_net | object | Public network information. The servers ipv4 address can be found in `public_net->ipv4->ip` |
+    | server_type | object | Type of server - determines how much ram, disk and cpu a server has |
+    | datacenter | object | Datacenter this server is located at |
+    | image | object,&nbsp;null | Image this server was created from. |
+    | iso | object,&nbsp;null | ISO image that is attached to this server. Null if no ISO is attached. |
+    | rescue_enabled | boolean | True if rescue mode is enabled: Server will then boot into rescue system on next reboot. |
+    | locked | boolean | True if server has been locked and is not available to user. |
+    | backup_window | string,&nbsp;null | Time window (UTC) in which the backup will run, or null if the backups are not enabled |
+    | outgoing_traffic | number,&nbsp;null | Outbound Traffic for the current billing period in bytes |
+    | ingoing_traffic | number,&nbsp;null | Inbound Traffic for the current billing period in bytes |
+    | included_traffic | number | Free Traffic for the current billing period in bytes |
+    | protection | object | Protection configuration for the server |
+    | labels | object | User-defined labels (key-value pairs) |
+    | volumes | array | IDs of Volumes assigned to this server. |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers
+     ```
+
+
+
+    + Attributes
+        + `servers` (array[Server], required, fixed-type)
+    + Body
+
+## Get a Server [GET /servers/{id}]
+
+Returns a specific server object. The server must exist inside the project.
+
+
++ Parameters
+    + id: `42` (string) - ID of the server
+
++ Response 200 (application/json)
+    The `server` key in the reply contains a server object with this structure:
+
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of server |
+    | name | string | Name of the server (must be unique per project and a valid hostname as per RFC 1123) |
+    | status | string | Status of the server <br>Choices: `running`, `initializing`, `starting`, `stopping`, `off`, `deleting`, `migrating`, `rebuilding`, `unknown` |
+    | created | string | Point in time when the server was created (in ISO-8601 format) |
+    | public_net | object | Public network information. The servers ipv4 address can be found in `public_net->ipv4->ip` |
+    | server_type | object | Type of server - determines how much ram, disk and cpu a server has |
+    | datacenter | object | Datacenter this server is located at |
+    | image | object,&nbsp;null | Image this server was created from. |
+    | iso | object,&nbsp;null | ISO image that is attached to this server. Null if no ISO is attached. |
+    | rescue_enabled | boolean | True if rescue mode is enabled: Server will then boot into rescue system on next reboot. |
+    | locked | boolean | True if server has been locked and is not available to user. |
+    | backup_window | string,&nbsp;null | Time window (UTC) in which the backup will run, or null if the backups are not enabled |
+    | outgoing_traffic | number,&nbsp;null | Outbound Traffic for the current billing period in bytes |
+    | ingoing_traffic | number,&nbsp;null | Inbound Traffic for the current billing period in bytes |
+    | included_traffic | number | Free Traffic for the current billing period in bytes |
+    | protection | object | Protection configuration for the server |
+    | labels | object | User-defined labels (key-value pairs) |
+    | volumes | array | IDs of Volumes assigned to this server. |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42
+     ```
+
+
+
+    + Attributes
+        + `server` (Server, required)
+    + Body
+
+## Create a Server [POST /servers]
+
+Creates a new server. Returns preliminary information about the server as well as an action that covers progress of creation.
+
++ Request (application/json)
+    Please note that server names must be unique per project and valid hostnames as per RFC 1123
+    (i.e. may only contain letters, digits, periods, and dashes).
+    
+    For `server_type` you can either use the ID as listed in [`/server_types`](#server-types-get-all-server-types) or its name.
+    
+    For `image` you can either use the ID as listed in [`/images`](#images-get-all-images) or its name.
+    
+    If you want to create the server in a location, you must set `location` to the ID or name as listed in [`/locations`](#locations-get-all-locations). This is the recommended way. You can be even more specific by setting `datacenter` to the ID or name as listed in [`/datacenters`](#datacenters-get-all-datacenters). However directly specifying the datacenter is discouraged since supply availability in datacenters varies greatly and datacenters may be out of stock for extended periods of time or not serve certain server types at all.
+    
+    For accessing your server we strongly recommend to use SSH keys by passing the respective key ids in `ssh_keys`. If you do not specify any `ssh_keys` we will generate a root password for you and
+    return it in the response.
+    
+    
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | name | string&nbsp;(required) | Name of the server to create (must be unique per project and a valid hostname as per RFC 1123) |
+    | server_type | string&nbsp;(required) | ID or name of the server type this server should be created with |
+    | start_after_create | boolean&nbsp;(optional) | Start Server right after creation. Defaults to true. |
+    | image | string&nbsp;(required) | ID or name of the image the server is created from |
+    | ssh_keys | array&nbsp;(optional) | SSH key IDs or names which should be injected into the server at creation time |
+    | volumes | array&nbsp;(optional) | Volume IDs which should be attached to the server at the creation time. Volumes must be in the same location. |
+    | user_data | string&nbsp;(optional) | Cloud-Init user data to use during server creation. This field is limited to 32KiB. |
+    | labels | object&nbsp;(optional) | User-defined labels (key-value pairs) |
+    | automount | boolean&nbsp;(optional) | Auto mount volumes after attach. |
+    | location | string&nbsp;(optional) | ID or name of location to create server in. |
+    | datacenter | string&nbsp;(optional) | ID or name of datacenter to create server in. |
+
+    > #### Example curl
+     ```bash
+     curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $API_TOKEN" \
+  -d '{"name": "my-server", "server_type": "cx11", "location": "nbg1", "start_after_create": true, "image": "ubuntu-16.04", "ssh_keys": ["my-ssh-key"], "volumes": [1], "user_data": "#cloud-config\nruncmd:\n- [touch, /root/cloud-init-worked]\n", "automount": false}' \
+  https://api.hetzner.cloud/v1/servers
+     ```
+
+
+
+    + Attributes(Server create)
+
++ Response 201 (application/json)
+    The `server` key in the reply contains a server object with this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of server |
+    | name | string | Name of the server (must be unique per project and a valid hostname as per RFC 1123) |
+    | status | string | Status of the server <br>Choices: `initializing`, `starting`, `running`, `stopping`, `off`, `deleting`, `migrating`, `rebuilding` |
+    | created | string | Point in time when the server was created (in ISO-8601 format) |
+    | public_net | object | Public network information. The servers ipv4 address can be found in `public_net->ipv4->ip` |
+    | server_type | object | Type of server - determines how much ram, disk and cpu a server has |
+    | datacenter | object | Datacenter this server is located at |
+    | image | object,&nbsp;null | Image this server was created from. |
+    | iso | object,&nbsp;null | ISO image that is attached to this server. Null if no ISO is attached. |
+    | rescue_enabled | boolean | True if rescue mode is enabled: Server will then boot into rescue system on next reboot. |
+    | locked | boolean | True if server has been locked and is not available to user. |
+    | backup_window | string,&nbsp;null | Time window (UTC) in which the backup will run, or null if the backups are not enabled |
+    | outgoing_traffic | number,&nbsp;null | Outbound Traffic for the current billing period in bytes |
+    | ingoing_traffic | number,&nbsp;null | Inbound Traffic for the current billing period in bytes |
+    | included_traffic | number | Free Traffic for the current billing period in bytes |
+    | protection | object | Protection configuration for the server |
+    | labels | object | User-defined labels (key-value pairs) |
+    | volumes | array | IDs of Volumes assigned to this server. |
+
+
+
+
+    
+    The `action` key in the reply contains an action object with this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `running`, `success`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+
+
+
+
+    Additional actions like a `start_server` action to start the server after it has
+    been created or `attach_volume` actions to attach volumes to the server are returned
+    in the `next_actions` key (each element has the same structure as the `action` key).
+
+    #### Call specific error codes
+    
+    | Code | Description |
+    |------|-------------|
+    | `placement_error` | An error during placement of the server occured |
+    
+    + Attributes
+        + `server` (Server, required)
+            + `status`: `initializing` (enum[string], required) - Status of the server
+                + Members
+                    + `initializing`
+                    + `starting`
+                    + `running`
+                    + `stopping`
+                    + `off`
+                    + `deleting`
+                    + `migrating`
+                    + `rebuilding`
+        + `action` (ActionRunning, required)
+            + `id`: `1` (number, required)
+            + `command`: `create_server` (string)
+        + `next_actions` (array[ActionRunning], required)
+        + `root_password`: `YItygq1v3GYjjMomLaKc` (string, required, nullable) - Root password when no SSH keys have been specified
+
+    + Body
+
+## Update a Server [PUT /servers/{id}]
+
+Updates a server. You can update a server's name and a server's labels.
+
+Please note that server names must be unique per project and valid hostnames as per RFC 1123
+(i.e. may only contain letters, digits, periods, and dashes).
+
+Also note that when updating labels, the server's current set of labels will be replaced
+with the labels provided in the request body. So, for example, if you want to add a new label,
+you have to provide all existing labels plus the new label in the request body.
+
++ Parameters
+    + id: `42` (string) - ID of the server
+
++ Request (application/json)
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | name | string&nbsp;(optional) | New name to set |
+    | labels | object&nbsp;(optional) | New labels |
+
+    > #### Example curl
+     ```bash
+     curl -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer $API_TOKEN" \
+  -d '{"name": "new-name", "labels": {}}' \
+  https://api.hetzner.cloud/v1/servers/42
+     ```
+
+
+
+
+    + Attributes
+        + name: `new-name` (string) - New name to set
+        + labels (object) - New labels
+
++ Response 200 (application/json)
+    The `server` key in the reply contains the modified server object with the new name.
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of server |
+    | name | string | Server name |
+    | status | string | Status of the server <br>Choices: `running`, `initializing`, `starting`, `stopping`, `off`, `deleting`, `migrating`, `rebuilding`, `unknown` |
+    | created | string | Point in time when the server was created (in ISO-8601 format) |
+    | public_net | object | Public network information. The servers ipv4 address can be found in `public_net->ipv4->ip` |
+    | server_type | object | Type of server - determines how much ram, disk and cpu a server has |
+    | datacenter | object | Datacenter this server is located at |
+    | image | object,&nbsp;null | Image this server was created from. |
+    | iso | object,&nbsp;null | ISO image that is attached to this server. Null if no ISO is attached. |
+    | rescue_enabled | boolean | True if rescue mode is enabled: Server will then boot into rescue system on next reboot. |
+    | locked | boolean | True if server has been locked and is not available to user. |
+    | backup_window | string,&nbsp;null | Time window (UTC) in which the backup will run, or null if the backups are not enabled |
+    | outgoing_traffic | number,&nbsp;null | Outbound Traffic for the current billing period in bytes |
+    | ingoing_traffic | number,&nbsp;null | Inbound Traffic for the current billing period in bytes |
+    | included_traffic | number | Free Traffic for the current billing period in bytes |
+    | protection | object | Protection configuration for the server |
+    | labels | object | User-defined labels (key-value pairs) |
+    | volumes | array | IDs of Volumes assigned to this server. |
+
+
+
+
+    + Attributes
+        + `server` (Server, required)
+            + name: `new-name` (string) - Server name
+    + Body
+
+## Delete a Server [DELETE /servers/{id}]
+
+Deletes a server. This immediately removes the server from your account, and it is no longer accessible.
+
++ Parameters
+    + id: `42` (string) - ID of the server
+
++ Response 200 (application/json)
+    The `action` key in the reply contains an action object with this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `running`, `success`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -X DELETE -H "Content-Type: application/json" -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42
+     ```
+
+
+
+    + Attributes
+        + `action` (ActionRunning, required)
+            + `command`: `delete_server` (string)
+
+## Get Metrics for a Server [GET /servers/{id}/metrics{?type,start,end,step}]
+
+Get Metrics for specified server.
+
+You must specify the type of metric to get: `cpu`, `disk` or `network`. You can also specify more than one type by comma separation, e.g. `cpu,disk`.
+
+Depending on the type you will get different time series data:
+
+|Type | Timeseries | Unit | Description |
+|---- |------------|------|-------------|
+|cpu|cpu | percent | Percent CPU usage |
+|disk|disk.0.iops.read | iop/s | Number of read IO operations per second|
+||disk.0.iops.write | iop/s | Number of write IO operations per second|
+||disk.0.bandwidth.read |bytes/s |Bytes read per second|
+||disk.0.bandwidth.write | bytes/s | Bytes written per second |
+|network|network.0.pps.<span>in</span>| packets/s | Public Network interface packets per second received|
+||network.0.pps.out | packets/s | Public Network interface packets per second sent|
+||network.0.bandwidth.<span>in</span> | bytes/s | Public Network interface bytes/s received|
+||network.0.bandwidth.out | bytes/s | Public Network interface bytes/s sent|
+
+
+Metrics are available for the last 30 days only.
+
+If you do not provide the step argument we will automatically adjust it so that a maximum of 100 samples are returned.
+
+We limit the number of samples returned to a maximum of 500 and will adjust the step parameter accordingly.
+
+ + Parameters
+     + id: `42` (string) - ID of the server
+     + type: `cpu` (enum[string], required) - Type of metrics to get
+       + `cpu`
+       + `disk`
+       + `network`
+     + start: `2017-01-01T00:00:00Z` (string, required) - Start of period to get Metrics for (in ISO-8601 format)
+     + end: `2017-01-01T23:00:00Z` (string, required) - End of period to get Metrics for (in ISO-8601 format)
+     + step: `60` (number, optional) - Resolution of results in seconds
+
++ Response 200 (application/json)
+    The `metrics` key in the reply contains a metrics object with this structure:
+    
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | start | string | Start of period of metrics reported (in ISO-8601 format) |
+    | end | string | End of period of metrics reported (in ISO-8601 format) |
+    | step | number | Resolution of results in seconds. |
+    | time_series | object | Hash with timeseries information, containing the name of timeseries as key |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42/metrics?type=cpu&start=2017-01-01T00:00:00Z&end=2017-01-01T23:00:00Z
+     ```
+
+
+
+    
+    The `time_series` key in the returned metrics object is a hash with one key per series returned with this structure:
+    
+    ```
+    "time_series": {
+        "name_of_timeseries": {
+            "values": [
+              [
+                1435781470.622,
+                "42"
+              ],
+              [
+                1435781471.622,
+                "43"
+              ]
+            ]
+        }
+    }
+    ```
+    
+    Contrary to the example on the right the timestamp is a number and not a string.
+
+    + Attributes
+        + `metrics` (Metrics Generic, required)
+
+
+
+# Server Actions [/servers/{id}/actions]
+
+## Get all Actions for a Server [GET /servers/{id}/actions{?status,sort}]
+
+Returns all action objects for a server.
+
++ Parameters
+    + id: `42` (string) - ID of the server
+    + status (enum[string], optional) - Can be used multiple times. Response will have only actions with specified statuses.
+        + Members
+            + `running`
+            + `success`
+            + `error`
+    + sort (enum[string], optional) - Can be used multiple times.
+        + Members
+            + `id`
+            + `id:asc`
+            + `id:desc`
+            + `command`
+            + `command:asc`
+            + `command:desc`
+            + `status`
+            + `status:asc`
+            + `status:desc`
+            + `progress`
+            + `progress:asc`
+            + `progress:desc`
+            + `started`
+            + `started:asc`
+            + `started:desc`
+            + `finished`
+            + `finished:asc`
+            + `finished:desc`
+
++ Response 200 (application/json)
+    The `actions` key in the reply contains an array of action objects with this structure:
+
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `success`, `running`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42/actions
+     ```
+
+
+
+    + Attributes
+        + `actions` (array[Action], required, fixed-type)
+    + Body
+
+## Get a specific Action for a Server [GET /servers/{id}/actions/{action_id}]
+
+Returns a specific action object for a Server.
+
++ Parameters
+    + id: `42` (string) - ID of the server
+    + action_id: `1337` (string) - ID of the action
+
++ Response 200 (application/json)
+    The `action` key in the reply has this structure:
+
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `success`, `running`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42/actions/1337
+     ```
+
+
+
+    + Attributes
+        + `action` (Action, required)
+    + Body
+
+## Power on a Server [POST /servers/{id}/actions/poweron]
+
+Starts a server by turning its power on.
+
++ Parameters
+    + id: `42` (string) - ID of the server
+
++ Response 201 (application/json)
+    The `action` key in the reply contains an action object with this structure:
+
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `running`, `success`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42/actions/poweron
+     ```
+
+
+
+    
+    + Attributes
+        + `action` (ActionRunning, required)
+            + `command`: `start_server` (string)
+    + Body
+
+## Soft-reboot a Server [POST /servers/{id}/actions/reboot]
+
+Reboots a server gracefully by sending an ACPI request. The server operating system must
+support ACPI and react to the request, otherwise the server will not reboot.
+
++ Parameters
+    + id: `42` (string) - ID of the server
+
++ Response 201 (application/json)
+    The `action` key in the reply contains an action object with this structure:
+
+    | Parameter | Type | Description |
+    |-------------|-------------|-------------|
+    | id | number | ID of the action |
+    | command | string | Command executed in the action |
+    | status | string | Status of the action <br>Choices: `running`, `success`, `error` |
+    | progress | number | Progress of action in percent |
+    | started | string | Point in time when the action was started (in ISO-8601 format) |
+    | finished | string,&nbsp;null | Point in time when the action was finished (in ISO-8601 format). Only set if the action is finished otherwise null. |
+    | resources | array | Resources the action relates to |
+    | error | object,&nbsp;null | Error message for the action if error occured, otherwise null. |
+
+    > #### Example curl
+     ```bash
+     curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $API_TOKEN" \
+  https://api.hetzner.cloud/v1/servers/42/actions/reboot
+     ```
+
+
+
+    
+    + Attributes
+        + `action` (ActionRunning, required)
+            + `command`: `reboot_server` (string)
+    + Body

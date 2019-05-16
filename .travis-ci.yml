@@ -1,0 +1,14 @@
+language: go
+env:
+  - GO111MODULE=on
+stages:
+  - test
+go:
+  - 1.12
+
+before_script:
+  - ci/install_drafter.sh
+script:
+  - ci/test_style.sh
+  - ci/test.sh
+
