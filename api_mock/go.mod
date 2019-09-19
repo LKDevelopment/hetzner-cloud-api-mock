@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/bukalapak/snowboard v1.7.0
 	github.com/cweill/gotests v1.5.3 // indirect
-	github.com/gorilla/mux v1.7.0
+	github.com/gorilla/mux v1.7.3
 	github.com/gosimple/slug v1.4.2 // indirect
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
 	github.com/stretchr/testify v1.3.0 // indirect
