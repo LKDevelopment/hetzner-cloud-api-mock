@@ -1,6 +1,8 @@
 package model
 
 import (
+	"encoding/json"
+	"log"
 	"regexp"
 	"strings"
 
@@ -21,7 +23,7 @@ func (p *Transformer) mapIntoApiRoutes(resources []*api.Resource) (resp []APIRou
 				Method:       method.Method,
 				Description:  method.Title,
 				Route:        re.ReplaceAllString(method.Href.Path, ""),
-				Response:     method.Transactions[0].Response.Body.Body,
+				Response:     p.addSampleMetaDataToResponse(method.Transactions[0].Response.Body.Body, method.Method, re.ReplaceAllString(method.Href.Path, "")),
 				ResponseCode: method.Transactions[0].Response.StatusCode,
 				JsonSchema:   method.Transactions[0].Request.Schema.Body,
 			})
@@ -29,7 +31,29 @@ func (p *Transformer) mapIntoApiRoutes(resources []*api.Resource) (resp []APIRou
 	}
 	return
 }
-
+func (p *Transformer) addSampleMetaDataToResponse(body string, method string, path string) string {
+	if method == "GET" && strings.Count(path, "/") == 1 {
+		var result map[string]interface{}
+		json.Unmarshal([]byte(body), &result)
+		for key, value := range result {
+			// Each value is an interface{} type, that is type asserted as a string
+			log.Println(key, value)
+		}
+		samplePagination := make(map[string]string)
+		samplePagination["page"] = "1"
+		samplePagination["per_page"] = "25"
+		samplePagination["previous_page"] = "1"
+		samplePagination["next_page"] = "1"
+		samplePagination["last_page"] = "1"
+		samplePagination["total_entries"] = "100"
+		meta := make(map[string]map[string]string)
+		meta["pagination"] = samplePagination
+		result["meta"] = meta
+		data, _ := json.Marshal(result)
+		return string(data)
+	}
+	return body
+}
 func (p *Transformer) groupIntoAPIHandler(routes []APIRoute) map[string]APIHandler {
 	handler := make(map[string]APIHandler)
 	for _, route := range routes {
