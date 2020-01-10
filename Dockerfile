@@ -1,4 +1,4 @@
-FROM golang:1.13.4 AS build
+FROM golang:1.13.6 AS build
 WORKDIR /api-mock-server
 COPY api_mock /api-mock-server
 RUN GO111MODULES=on go mod vendor
