@@ -44,8 +44,8 @@ func (p *Transformer) addSampleMetaDataToResponse(body string, method string, pa
 		samplePagination["per_page"] = "25"
 		samplePagination["previous_page"] = "1"
 		samplePagination["next_page"] = ""
-		samplePagination["last_page"] = ""
-		samplePagination["total_entries"] = "100"
+		samplePagination["last_page"] = "1"
+		samplePagination["total_entries"] = "1"
 		meta := make(map[string]map[string]string)
 		meta["pagination"] = samplePagination
 		result["meta"] = meta
