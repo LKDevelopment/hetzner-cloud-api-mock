@@ -1,6 +1,7 @@
 ## [Unofficial] Hetzner Cloud API Mock
 
-*** This is no longer maintained, because the Hetzner Cloud does not use API Blueprint anymore! ***
+***This is no longer maintained, because the Hetzner Cloud does not use API Blueprint anymore!***
+
 This mock allows developers to test against the Hetzner Cloud API without creating real resources or having a real account on the Hetzner Cloud. 
 It uses the API Blueprint from the documentation.
 
